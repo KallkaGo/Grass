@@ -1,22 +1,11 @@
+#include '../includes/common.glsl'
+
 varying vec2 vUvs;
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
 varying vec3 vColor;
 varying vec4 vGrassData;
 uniform vec2 resolution;
-
-float inverseLerp(float v, float minValue, float maxValue) {
-  return (v - minValue) / (maxValue - minValue);
-}
-
-float remap(float v, float inMin, float inMax, float outMin, float outMax) {
-  float t = inverseLerp(v, inMin, inMax);
-  return mix(outMin, outMax, t);
-}
-
-float saturate(float x) {
-  return clamp(x, 0.0, 1.0);
-}
 
 vec3 hemiLight(vec3 normal, vec3 groundColor, vec3 skyColor) {
   return mix(groundColor, skyColor, .5 * normal.y + .5);

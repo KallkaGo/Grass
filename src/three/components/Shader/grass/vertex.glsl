@@ -1,3 +1,5 @@
+#include '../includes/common.glsl'
+
 varying vec4 vGrassData;
 varying vec3 vColor;
 varying vec3 vNormal;
@@ -54,19 +56,6 @@ mat3 rotateAxis(vec3 axis, float angle) {
   float oc = 1.0 - c;
 
   return mat3(oc * axis.x * axis.x + c, oc * axis.x * axis.y - axis.z * s, oc * axis.z * axis.x + axis.y * s, oc * axis.x * axis.y + axis.z * s, oc * axis.y * axis.y + c, oc * axis.y * axis.z - axis.x * s, oc * axis.z * axis.x - axis.y * s, oc * axis.y * axis.z + axis.x * s, oc * axis.z * axis.z + c);
-}
-
-float inverseLerp(float v, float minValue, float maxValue) {
-  return (v - minValue) / (maxValue - minValue);
-}
-
-float remap(float v, float inMin, float inMax, float outMin, float outMax) {
-  float t = inverseLerp(v, inMin, inMax);
-  return mix(outMin, outMax, t);
-}
-
-float saturate(float x) {
-  return clamp(x, 0.0, 1.0);
 }
 
 vec3 bezier(vec3 P0, vec3 P1, vec3 P2, vec3 P3, float t) {
