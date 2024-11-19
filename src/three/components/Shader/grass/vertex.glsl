@@ -1,8 +1,9 @@
-uniform vec4 grassParams;
 varying vec4 vGrassData;
 varying vec3 vColor;
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
+uniform vec4 grassParams;
+uniform float time;
 
 uvec2 murmurHash21(uint src) {
   const uint M = 0x5bd1e995u;
@@ -21,12 +22,6 @@ uvec2 murmurHash21(uint src) {
 vec2 hash21(float src) {
   uvec2 h = murmurHash21(floatBitsToUint(src));
   return uintBitsToFloat(h & 0x007fffffu | 0x3f800000u) - 1.0;
-}
-
-vec2 quickHash(float p) {
-  vec2 r = vec2(dot(vec2(p), vec2(17.43267, 23.8934543)), dot(vec2(p), vec2(13.98342, 37.2435232)));
-
-  return fract(sin(r) * 1743.54892229);
 }
 
 float easeOut(float x, float t) {
@@ -51,6 +46,14 @@ mat3 rotateY(float theta) {
   float c = cos(theta);
   float s = sin(theta);
   return mat3(vec3(c, 0, s), vec3(0, 1, 0), vec3(-s, 0, c));
+}
+
+mat3 rotateAxis(vec3 axis, float angle) {
+  float s = sin(angle);
+  float c = cos(angle);
+  float oc = 1.0 - c;
+
+  return mat3(oc * axis.x * axis.x + c, oc * axis.x * axis.y - axis.z * s, oc * axis.z * axis.x + axis.y * s, oc * axis.x * axis.y + axis.z * s, oc * axis.y * axis.y + c, oc * axis.y * axis.z - axis.x * s, oc * axis.z * axis.x - axis.y * s, oc * axis.y * axis.z + axis.x * s, oc * axis.z * axis.z + c);
 }
 
 float inverseLerp(float v, float minValue, float maxValue) {
@@ -140,7 +143,17 @@ void main() {
   // float offset = float(gl_InstanceID) * .5;
 
   // Grass lean factor
-  float leanFactor = remap(hashVal.y, -1., 1., -0.5, 0.5);
+
+  float windStrength = noise(vec3(grassBladeWorldPos.xz * .05, 0.) + time);
+  float windAngle = 3.14159 / 4.;
+  vec3 windAxis = vec3(cos(windAngle), 0., sin(windAngle));
+
+  float windLeanAngle = windStrength * 1.5 * heightPercent;
+
+  // float randomLeanAnmation = sin(time * 2. + hashVal.y) * .025;
+  float randomLeanAnmation = noise(vec3(grassBladeWorldPos.xz, time * 4.)) * (windStrength * .5 + .125);
+  randomLeanAnmation = 0.;
+  float leanFactor = remap(hashVal.y, -1., 1., -0.5, 0.5) + randomLeanAnmation;
   // Debug
   // leanFactor = 1.;
 
@@ -163,7 +176,7 @@ void main() {
   z = curve.z * height;
 
   // Generate grass matrix
-  mat3 grassMat = rotateY(angle);
+  mat3 grassMat = rotateAxis(windAxis, windLeanAngle) * rotateY(angle);
 
   vec3 grassLocalPisition = grassMat * vec3(x, y, z) + grassOffset;
 

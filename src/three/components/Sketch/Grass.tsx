@@ -14,7 +14,7 @@ import grassFragmentShader from "../Shader/grass/fragment.glsl";
 
 import { useFrame } from "@react-three/fiber";
 
-const NUM_GRASS = 16 * 1024 * 2;
+const NUM_GRASS = 16 * 1024 * 3;
 const GRASS_SEGMENTS = 6;
 const GRASS_VERTICES = (GRASS_SEGMENTS + 1) * 2;
 const GRASS_PATCH_SIZE = 32;
@@ -58,13 +58,16 @@ const Grass = () => {
         new Vector4(GRASS_SEGMENTS, GRASS_PATCH_SIZE, GRASS_WIDTH, GRASS_HEIGHT)
       ),
       resolution: new Uniform(new Vector2(1, 1)),
+      time: new Uniform(0),
     }),
     []
   );
 
   useFrame((state, delta) => {
+    delta %= 1;
     const dpr = state.gl.getPixelRatio();
     uniforms.resolution.value.set(innerWidth * dpr, innerHeight * dpr);
+    uniforms.time.value += delta;
   });
 
   return (
