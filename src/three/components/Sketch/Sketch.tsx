@@ -3,6 +3,7 @@ import { useInteractStore, useLoadedStore } from "@utils/Store";
 import { useEffect } from "react";
 import Sky from "./Sky";
 import Ground from "./Ground";
+import Grass from "./Grass";
 
 const Sketch = () => {
   const controlDom = useInteractStore((state) => state.controlDom);
@@ -17,6 +18,7 @@ const Sketch = () => {
       <color attach={"background"} args={["black"]} />
       <Sky />
       <Ground />
+      <Grass />
     </>
   );
 };

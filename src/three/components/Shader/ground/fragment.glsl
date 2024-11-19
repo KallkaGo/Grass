@@ -29,5 +29,11 @@ void main() {
 
   vec3 colour = gridColour;
 
+  // Debug
+  // float d1 = length(vWorldPosition - vec3(0.0, 0.0, 5.0)) - 1.;
+  // float d2 = length(vWorldPosition - vec3(5.0, 0.0, 0.0)) - 1.;
+  // colour = mix(vec3(0., 0., 1.), vec3(0.), smoothstep(0.0, 0.1, d1));
+  // colour = mix(vec3(1., 0., 0.), colour, smoothstep(0.0, 0.1, d2));
+
   gl_FragColor = vec4(pow(colour, vec3(1.0 / 2.2)), 1.0);
 }

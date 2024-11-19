@@ -15,10 +15,10 @@ export default function ThreeContainer() {
                 className="webgl"
                 dpr={[1, 2]}
                 camera={{
-                    fov: 50,
+                    fov: 60,
                     near: 0.1,
                     position: [10, 5, 5],
-                    far: 10000,
+                    far: 1000,
                 }}
                 gl={{toneMapping:NoToneMapping}}
 

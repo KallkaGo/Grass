@@ -20,7 +20,7 @@ const Sky = () => {
   return (
     <>
       <mesh>
-        <sphereGeometry args={[5000, 32, 15]} />
+        <sphereGeometry args={[500, 32, 15]} />
         <shaderMaterial
           side={BackSide}
           vertexShader={skyVertexShader}
