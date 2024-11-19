@@ -13,10 +13,10 @@ vec3 hemiLight(vec3 normal, vec3 groundColor, vec3 skyColor) {
 
 vec3 lambertLight(vec3 normal, vec3 viewDir, vec3 lightDir, vec3 lightColor) {
   float wrap = .5;
-  float NdotL = saturate((dot(normal, lightDir) + wrap) / 1. + wrap);
+  float NdotL = (saturate(dot(normal, lightDir)) + wrap) / (1. + wrap);
   vec3 lighting = vec3(NdotL);
 
-  float backlight = saturate((dot(viewDir, -lightDir) + wrap) / 1. + wrap);
+  float backlight = (saturate(dot(viewDir, -lightDir)) + wrap) / (1. + wrap);
 
   vec3 scatter = vec3(pow(backlight, 2.0));
 

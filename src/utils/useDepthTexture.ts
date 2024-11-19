@@ -2,8 +2,6 @@ import { useFBO } from "@react-three/drei"
 import { useFrame, useThree } from "@react-three/fiber"
 import { useMemo } from "react"
 import { DepthFormat, DepthTexture, NearestFilter, RGBAFormat, ShaderMaterial, Texture, Uniform, UnsignedByteType, UnsignedShortType } from "three"
-import vertexShader from '@/three/components/shader/depthTex/vertex.glsl'
-import fragmentShader from '@/three/components/shader/depthTex/fragment.glsl'
 import { FullScreenQuad } from "three/examples/jsm/Addons.js"
 
 
