@@ -7,6 +7,8 @@ varying vec3 vWorldPosition;
 uniform vec4 grassParams;
 uniform float time;
 
+#define PI 3.14159
+
 uvec2 murmurHash21(uint src) {
   const uint M = 0x5bd1e995u;
   uvec2 h = uvec2(1190494759u, 2147483647u);
@@ -99,19 +101,19 @@ void main() {
   vec4 grassBladeWorldPos = modelMatrix * vec4(grassOffset, 1.0);
   vec3 hashVal = hash(grassBladeWorldPos.xyz);
 
-  const float PI = 3.14159;
   float angle = remap(hashVal.x, -1., 1., -PI, PI);
 
   // debug
   // grassOffset = vec3(float(gl_InstanceID) * .5 - 8., 0., 0.);
   // angle = float(gl_InstanceID) * .2;
 
-  // Figure out vertex id, > GRASS_VERTICES is other side
+  // Figure out vertex id
   int vertexFB_ID = gl_VertexID % (GRASS_VERTICES * 2);
   int vertex_ID = vertexFB_ID % GRASS_VERTICES;
 
   // 0 = left, 1 = right 奇偶性
   int xTest = vertex_ID & 0x1;
+  // > GRASS_VERTICES is other side frontSide or BackSide
   int zTest = (vertexFB_ID >= GRASS_VERTICES) ? 1 : -1;
 
   float xSide = float(xTest);
@@ -133,8 +135,8 @@ void main() {
 
   // Grass lean factor
 
-  float windStrength = noise(vec3(grassBladeWorldPos.xz * .05, 0.) + time);
-  float windAngle = 3.14159 / 4.;
+  float windStrength = noise(vec3(grassBladeWorldPos.xz * .05, 0.) + time * .35);
+  float windAngle = PI / 4.;
   vec3 windAxis = vec3(cos(windAngle), 0., sin(windAngle));
 
   float windLeanAngle = windStrength * 1.5 * heightPercent;
@@ -155,6 +157,7 @@ void main() {
   vec3 curve = bezier(p1, p2, p3, p4, heightPercent);
 
   // Calculate normal
+  // bezierGrad return tangent at curve
   vec3 curveGrad = bezierGrad(p1, p2, p3, p4, heightPercent);
 
   // column major

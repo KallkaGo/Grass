@@ -24,6 +24,7 @@ const GRASS_HEIGHT = 2;
 const Grass = () => {
   const geometry = useMemo(() => {
     const indices: number[] = [];
+    // 正面 0->1->2  2->1->3 背面和正面顺序相反
     for (let i = 0; i < GRASS_SEGMENTS; i++) {
       const vi = i * 2;
       indices[i * 12 + 0] = vi + 0;
