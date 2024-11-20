@@ -123,7 +123,7 @@ void main() {
 
   // float width = GRASS_WIDTH;
 
-  float height = GRASS_HEIGHT * tileGrassHeight *remap(hashVal.y, -1., 1., .7, 1.);
+  float height = GRASS_HEIGHT * tileGrassHeight * remap(hashVal.y, -1., 1., .7, 1.);
 
   float x = (xSide - .5) * width;
   float y = heightPercent * height;
@@ -197,10 +197,10 @@ void main() {
 
   gl_Position = projectionMatrix * mvPosition;
 
-  // Remove grass below threshold
-  // gl_Position.w = tileGrassHeight < .25 ? 0. : gl_Position.w;
-
   // gl_Position = projectionMatrix * modelViewMatrix * vec4(grassLocalPisition, 1.0);
+
+  // Remove grass below threshold
+  gl_Position.w = tileGrassHeight < .25 ? 0. : gl_Position.w;
 
   // vColor = mix(BASE_COLOR, TIP_COLOR, heightPercent);
   // vColor = mix(vec3(1., 0., 0.), vColor, stiffness);
