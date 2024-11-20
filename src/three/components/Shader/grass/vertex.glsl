@@ -65,8 +65,8 @@ vec3 terrianHeight(vec3 worldPos) {
   return vec3(worldPos.x, noise(worldPos * .02) * 10.0, worldPos.z);
 }
 
-const vec3 BASE_COLOR = vec3(0.1, 0.4, 0.04);
-const vec3 TIP_COLOR = vec3(0.5, 0.7, 0.3);
+const vec3 BASE_COLOR = vec3(0.14, 0.56, 0.06);
+const vec3 TIP_COLOR = vec3(0.0, 1.0, 0.0);
 
 void main() {
 
@@ -119,11 +119,13 @@ void main() {
 
   // float width = GRASS_WIDTH * easeOut(1. - heightPercent, 4.);
 
-  float width = GRASS_WIDTH * smoothstep(0., .25, 1. - heightPercent) * tileGrassHeight;
+  float width = GRASS_WIDTH * mix(1., smoothstep(0., .25, 1. - heightPercent), step(tileData.x, .7)) * tileGrassHeight;
+
+  // float width = GRASS_WIDTH * smoothstep(0., .25, 1. - heightPercent) * tileGrassHeight;
 
   // float width = GRASS_WIDTH;
 
-  float height = GRASS_HEIGHT * tileGrassHeight * remap(hashVal.y, -1., 1., .7, 1.);
+  float height = GRASS_HEIGHT * tileGrassHeight * remap(hashVal.y, -1., 1., .7, 1.) * max(1., mix(1., 1.5, grassType) * tileData.x);
 
   float x = (xSide - .5) * width;
   float y = heightPercent * height;

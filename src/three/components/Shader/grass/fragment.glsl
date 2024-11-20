@@ -7,8 +7,7 @@ varying vec3 vWorldPosition;
 varying vec3 vColor;
 varying vec4 vGrassData;
 uniform vec2 resolution;
-uniform sampler2D grassDiffuseTex1;
-uniform sampler2D grassDiffuseTex2;
+uniform sampler2DArray grassDiffuseTex;
 
 vec3 hemiLight(vec3 normal, vec3 groundColor, vec3 skyColor) {
   return mix(groundColor, skyColor, .5 * normal.y + .5);
@@ -42,12 +41,17 @@ vec3 phongSpecular(vec3 normal, vec3 lgihtDir, vec3 viewDir) {
 }
 
 vec4 grassDiffuse(vec2 uv, float grassType) {
-  vec4 diffuse1 = texture2D(grassDiffuseTex1, uv);
 
-  vec4 diffuse2 = texture2D(grassDiffuseTex2, uv);
+  vec4 diffuse = texture2D(grassDiffuseTex, vec3(uv, grassType));
 
   vec4 mixColor = min(vec4(1.), vec4(vColor, 1.) * 1.2);
-  return mix(vec4(vColor, 1.), mixColor, tileX);
+
+  mixColor = mix(diffuse, mixColor, 1. - tileX);
+
+  if(mixColor.a < .7)
+    discard;
+
+  return mixColor;
 }
 
 void main() {
@@ -67,9 +71,6 @@ void main() {
 
   vec4 baseColor = grassDiffuse(uv, grassType);
 
-  if(baseColor.a < .5)
-    discard;
-
   // vec3 baseColor = mix(vColor * .75, vColor, smoothstep(.125, 0., abs(grassX)));
 
   // hemi
@@ -80,21 +81,21 @@ void main() {
   // Directional Light
   vec3 lightDir = normalize(vec3(-1., .5, 1.));
   vec3 lightColor = vec3(1.);
-  vec3 diffuseLighting = lambertLight(normal, viewDir, lightDir, lightColor);
+  // vec3 diffuseLighting = lambertLight(normal, viewDir, lightDir, lightColor);
 
   // Specular
   vec3 specular = phongSpecular(normal, lightDir, viewDir);
 
   // AO
-  float ao = remap(pow(grassY, 2.), 0., 1., .125, 1.);
+  float ao = remap(pow(grassY, 2.), 0., 1., .7, 1.);
 
-  vec3 lighting = diffuseLighting * .5 + ambientLight * .5;
-  vec3 color = baseColor.rgb * ambientLight + specular * .15;
+  // vec3 lighting = diffuseLighting * .5 + ambientLight * .5;
 
-  // color *= ao;
+  vec3 albedo = baseColor.rgb * ambientLight + specular * .15;
 
+  albedo *= ao;
   // color = lighting;
 
   // gamma correct
-  gl_FragColor = vec4(pow(color, vec3(1.0 / 2.2)), 1.0);
+  gl_FragColor = vec4(pow(albedo, vec3(1.0 / 2.2)), 1.0);
 }

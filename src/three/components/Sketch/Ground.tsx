@@ -21,8 +21,8 @@ const Ground = () => {
 
   return (
     <>
-      <mesh rotation-x={-Math.PI / 2} scale={60}>
-        <planeGeometry args={[1, 1, 512, 512]} />
+      <mesh rotation-x={-Math.PI / 2} scale={50}>
+        <planeGeometry args={[1, 1, 128, 128]} />
         <shaderMaterial
           vertexShader={groundVertexShader}
           fragmentShader={groundFragmentShader}
