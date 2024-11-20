@@ -4,6 +4,7 @@ varying vec4 vGrassData;
 varying vec3 vColor;
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
+varying float tileX;
 uniform vec4 grassParams;
 uniform sampler2D tileDataTexture;
 uniform float time;
@@ -96,6 +97,7 @@ void main() {
   // Stiffness
   float stiffness = 1.0;
   float tileGrassHeight = (1. - tileData.x) * mix(1., 1.5, grassType);
+  tileGrassHeight = 1.;
 
   // debug
   // grassOffset = vec3(float(gl_InstanceID) * .5 - 8., 0., 0.);
@@ -117,11 +119,11 @@ void main() {
 
   // float width = GRASS_WIDTH * easeOut(1. - heightPercent, 4.);
 
-  // float width = GRASS_WIDTH * smoothstep(0., .25, 1. - heightPercent) * tileGrassHeight;
+  float width = GRASS_WIDTH * smoothstep(0., .25, 1. - heightPercent) * tileGrassHeight;
 
-  float width = GRASS_WIDTH;
+  // float width = GRASS_WIDTH;
 
-  float height = GRASS_HEIGHT * tileGrassHeight;
+  float height = GRASS_HEIGHT * tileGrassHeight *remap(hashVal.y, -1., 1., .7, 1.);
 
   float x = (xSide - .5) * width;
   float y = heightPercent * height;
@@ -196,27 +198,29 @@ void main() {
   gl_Position = projectionMatrix * mvPosition;
 
   // Remove grass below threshold
-  gl_Position.w = tileGrassHeight < .25 ? 0. : gl_Position.w;
+  // gl_Position.w = tileGrassHeight < .25 ? 0. : gl_Position.w;
 
   // gl_Position = projectionMatrix * modelViewMatrix * vec4(grassLocalPisition, 1.0);
 
-  vColor = mix(BASE_COLOR, TIP_COLOR, heightPercent);
-  vColor = mix(vec3(1., 0., 0.), vColor, stiffness);
+  // vColor = mix(BASE_COLOR, TIP_COLOR, heightPercent);
+  // vColor = mix(vec3(1., 0., 0.), vColor, stiffness);
 
   // vColor = vec3(viewSpaceTickenFactor);
 
   // vColor = grassLocalNormal;
 
-  // vec3 c1 = mix(BASE_COLOR, TIP_COLOR, heightPercent);
-  // vec3 c2 = mix(vec3(0.6, 0.6, 0.4), vec3(0.88, 0.87, 0.52), heightPercent);
+  vec3 c1 = mix(BASE_COLOR, TIP_COLOR, heightPercent);
+  vec3 c2 = mix(vec3(0.6, 0.6, 0.4), vec3(0.88, 0.87, 0.52), heightPercent);
 
-  // float noiseValue = noise(grassBladeWorldPos.xyz * .1);
+  float noiseValue = noise(grassBladeWorldPos.xyz * .1);
 
-  // vColor = mix(c1, c2, smoothstep(-1., 1., noiseValue));
+  vColor = mix(c1, c2, smoothstep(-1., 1., noiseValue));
 
   vGrassData = vec4(x, heightPercent, xSide, grassType);
 
   vNormal = normalize((modelMatrix * vec4(grassLocalNormal, 0.)).xyz);
 
   vWorldPosition = (modelMatrix * vec4(grassLocalPisition, 1.0)).xyz;
+
+  tileX = tileData.x;
 }

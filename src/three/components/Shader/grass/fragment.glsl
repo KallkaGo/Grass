@@ -1,6 +1,7 @@
 #include '../includes/common.glsl'
 
 varying vec2 vUvs;
+varying float tileX;
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
 varying vec3 vColor;
@@ -33,7 +34,7 @@ vec3 phongSpecular(vec3 normal, vec3 lgihtDir, vec3 viewDir) {
   vec3 r = normalize(reflect(-lgihtDir, normal));
 
   float phongValue = max(0., dot(viewDir, r));
-  phongValue = pow(phongValue, 32.);
+  phongValue = pow(phongValue, 10.);
 
   vec3 specular = NdotL * vec3(phongValue);
 
@@ -45,7 +46,8 @@ vec4 grassDiffuse(vec2 uv, float grassType) {
 
   vec4 diffuse2 = texture2D(grassDiffuseTex2, uv);
 
-  return mix(diffuse1, diffuse2, grassType);
+  vec4 mixColor = min(vec4(1.), vec4(vColor, 1.) * 1.2);
+  return mix(vec4(vColor, 1.), mixColor, tileX);
 }
 
 void main() {
@@ -72,7 +74,7 @@ void main() {
 
   // hemi
   vec3 color1 = vec3(1., 1., .75);
-  vec3 color2 = vec3(.05, .05, .25);
+  vec3 color2 = vec3(0.45, 0.65, 0.14);
   vec3 ambientLight = hemiLight(normal, color2, color1);
 
   // Directional Light
@@ -86,11 +88,10 @@ void main() {
   // AO
   float ao = remap(pow(grassY, 2.), 0., 1., .125, 1.);
 
+  vec3 lighting = diffuseLighting * .5 + ambientLight * .5;
+  vec3 color = baseColor.rgb * ambientLight + specular * .15;
 
-  vec3 lighting = diffuseLighting * .5 + ambientLight * .5 + specular * .25;
-  vec3 color = baseColor.rgb * lighting;
-  
-  color *= ao;
+  // color *= ao;
 
   // color = lighting;
 

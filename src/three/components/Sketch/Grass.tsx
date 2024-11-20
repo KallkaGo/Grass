@@ -19,8 +19,8 @@ import RES from "../RES";
 const NUM_GRASS = 32 * 1024 * 1.5;
 const GRASS_SEGMENTS = 6;
 const GRASS_VERTICES = (GRASS_SEGMENTS + 1) * 2;
-const GRASS_PATCH_SIZE = 25;
-const GRASS_WIDTH = 0.25;
+const GRASS_PATCH_SIZE = 30;
+const GRASS_WIDTH = 0.15;
 const GRASS_HEIGHT = 2;
 
 const Grass = () => {
