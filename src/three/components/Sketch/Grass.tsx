@@ -13,15 +13,26 @@ import grassVertexShader from "../Shader/grass/vertex.glsl";
 import grassFragmentShader from "../Shader/grass/fragment.glsl";
 
 import { useFrame } from "@react-three/fiber";
+import { useTexture } from "@react-three/drei";
+import RES from "../RES";
 
-const NUM_GRASS = 16 * 1024 * 3;
+const NUM_GRASS = 32 * 1024 * 1.5;
 const GRASS_SEGMENTS = 6;
 const GRASS_VERTICES = (GRASS_SEGMENTS + 1) * 2;
-const GRASS_PATCH_SIZE = 32;
+const GRASS_PATCH_SIZE = 25;
 const GRASS_WIDTH = 0.25;
 const GRASS_HEIGHT = 2;
 
 const Grass = () => {
+  const tileDataTex = useTexture(RES.textures.tileData);
+  tileDataTex.flipY = false;
+
+  // grass diffuse
+  const [grassDiffuseTex1, grassDiffuseTex2] = useTexture([
+    RES.textures.grass1,
+    RES.textures.grass2,
+  ]);
+
   const geometry = useMemo(() => {
     const indices: number[] = [];
     // 正面 0->1->2  2->1->3 背面和正面顺序相反
@@ -60,6 +71,9 @@ const Grass = () => {
       ),
       resolution: new Uniform(new Vector2(1, 1)),
       time: new Uniform(0),
+      tileDataTexture: new Uniform(tileDataTex),
+      grassDiffuseTex1: new Uniform(grassDiffuseTex1),
+      grassDiffuseTex2: new Uniform(grassDiffuseTex2),
     }),
     []
   );

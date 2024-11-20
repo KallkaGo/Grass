@@ -1,14 +1,9 @@
+#include '../includes/common.glsl'
+
+varying vec2 vUv;
 varying vec3 vWorldPosition;
 uniform sampler2D diffuseTexture;
-
-float inverseLerp(float v, float minValue, float maxValue) {
-  return (v - minValue) / (maxValue - minValue);
-}
-
-float remap(float v, float inMin, float inMax, float outMin, float outMax) {
-  float t = inverseLerp(v, inMin, inMax);
-  return mix(outMin, outMax, t);
-}
+uniform sampler2D groundTex;
 
 float hash(vec2 p)  // replace this by something better
 {
@@ -17,6 +12,8 @@ float hash(vec2 p)  // replace this by something better
 }
 
 void main() {
+
+  vec3 colour = vec3(0.);
 
   // Grid
   float grid1 = texture(diffuseTexture, vWorldPosition.xz * 0.1).r;
@@ -27,7 +24,12 @@ void main() {
   vec3 gridColour = mix(vec3(0.5 + remap(gridHash1, -1.0, 1.0, -0.2, 0.2)), vec3(0.0625), grid2);
   gridColour = mix(gridColour, vec3(0.00625), grid1);
 
-  vec3 colour = gridColour;
+  colour = gridColour;
+
+  // Ground
+
+  vec4 groundTex = texture2D(groundTex, vUv);
+  colour = groundTex.rgb;
 
   // Debug
   // float d1 = length(vWorldPosition - vec3(0.0, 0.0, 5.0)) - 1.;

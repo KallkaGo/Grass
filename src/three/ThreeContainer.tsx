@@ -13,7 +13,7 @@ export default function ThreeContainer() {
             <Canvas
                 frameloop={demand ? "never" : "always"}
                 className="webgl"
-                dpr={[1, 2]}
+                dpr={[1, 1]}
                 camera={{
                     fov: 60,
                     near: 0.1,

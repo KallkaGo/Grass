@@ -5,6 +5,7 @@ varying vec3 vColor;
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
 uniform vec4 grassParams;
+uniform sampler2D tileDataTexture;
 uniform float time;
 
 #define PI 3.14159
@@ -30,20 +31,6 @@ vec2 hash21(float src) {
 
 float easeOut(float x, float t) {
   return 1. - pow(1. - x, t);
-}
-
-// The MIT License
-// Copyright © 2013 Inigo Quilez
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-// https://www.youtube.com/c/InigoQuilez
-// https://iquilezles.org/
-//
-// https://www.shadertoy.com/view/Xsl3Dl
-vec3 hash(vec3 p) // replace this by something better
-{
-  p = vec3(dot(p, vec3(127.1, 311.7, 74.7)), dot(p, vec3(269.5, 183.3, 246.1)), dot(p, vec3(113.5, 271.9, 124.6)));
-
-  return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
 }
 
 mat3 rotateY(float theta) {
@@ -73,13 +60,8 @@ vec3 bezierGrad(vec3 P0, vec3 P1, vec3 P2, vec3 P3, float t) {
     3.0 * t * t * (P3 - P2);
 }
 
-float noise(in vec3 p) {
-  vec3 i = floor(p);
-  vec3 f = fract(p);
-
-  vec3 u = f * f * (3.0 - 2.0 * f);
-
-  return mix(mix(mix(dot(hash(i + vec3(0.0, 0.0, 0.0)), f - vec3(0.0, 0.0, 0.0)), dot(hash(i + vec3(1.0, 0.0, 0.0)), f - vec3(1.0, 0.0, 0.0)), u.x), mix(dot(hash(i + vec3(0.0, 1.0, 0.0)), f - vec3(0.0, 1.0, 0.0)), dot(hash(i + vec3(1.0, 1.0, 0.0)), f - vec3(1.0, 1.0, 0.0)), u.x), u.y), mix(mix(dot(hash(i + vec3(0.0, 0.0, 1.0)), f - vec3(0.0, 0.0, 1.0)), dot(hash(i + vec3(1.0, 0.0, 1.0)), f - vec3(1.0, 0.0, 1.0)), u.x), mix(dot(hash(i + vec3(0.0, 1.0, 1.0)), f - vec3(0.0, 1.0, 1.0)), dot(hash(i + vec3(1.0, 1.0, 1.0)), f - vec3(1.0, 1.0, 1.0)), u.x), u.y), u.z);
+vec3 terrianHeight(vec3 worldPos) {
+  return vec3(worldPos.x, noise(worldPos * .02) * 10.0, worldPos.z);
 }
 
 const vec3 BASE_COLOR = vec3(0.1, 0.4, 0.04);
@@ -98,10 +80,22 @@ void main() {
   vec2 hashedInstanceID = hash21(float(gl_InstanceID)) * 2. - 1.;
   vec3 grassOffset = vec3(hashedInstanceID.x, 0, hashedInstanceID.y) * GRASS_PATCH_SIZE;
 
+  grassOffset = terrianHeight(grassOffset);
+
   vec4 grassBladeWorldPos = modelMatrix * vec4(grassOffset, 1.0);
   vec3 hashVal = hash(grassBladeWorldPos.xyz);
 
+  // Grass rotation
   float angle = remap(hashVal.x, -1., 1., -PI, PI);
+  // -x map 0 x map 1
+  vec4 tileData = texture2D(tileDataTexture, vec2(grassBladeWorldPos.x, grassBladeWorldPos.z) / GRASS_PATCH_SIZE * .5 + .5);
+
+  // Grass Type
+  float grassType = saturate(hashVal.z) > .75 ? 1. : 0.;
+
+  // Stiffness
+  float stiffness = 1.0;
+  float tileGrassHeight = (1. - tileData.x) * mix(1., 1.5, grassType);
 
   // debug
   // grassOffset = vec3(float(gl_InstanceID) * .5 - 8., 0., 0.);
@@ -123,9 +117,11 @@ void main() {
 
   // float width = GRASS_WIDTH * easeOut(1. - heightPercent, 4.);
 
-  float width = GRASS_WIDTH * smoothstep(0., .25, 1. - heightPercent);
+  // float width = GRASS_WIDTH * smoothstep(0., .25, 1. - heightPercent) * tileGrassHeight;
 
-  float height = GRASS_HEIGHT;
+  float width = GRASS_WIDTH;
+
+  float height = GRASS_HEIGHT * tileGrassHeight;
 
   float x = (xSide - .5) * width;
   float y = heightPercent * height;
@@ -135,16 +131,19 @@ void main() {
 
   // Grass lean factor
 
-  float windStrength = noise(vec3(grassBladeWorldPos.xz * .05, 0.) + time * .35);
+  float windStrength = noise(vec3(grassBladeWorldPos.xz * .05, 0.) + time * .5);
   float windAngle = PI / 4.;
   vec3 windAxis = vec3(cos(windAngle), 0., sin(windAngle));
-
-  float windLeanAngle = windStrength * 1.5 * heightPercent;
-
+  float windLeanAngle = windStrength * 1.5 * heightPercent * stiffness;
   // float randomLeanAnmation = sin(time * 2. + hashVal.y) * .025;
   float randomLeanAnmation = noise(vec3(grassBladeWorldPos.xz, time * 4.)) * (windStrength * .5 + .125);
-  randomLeanAnmation = 0.;
+
+  // debug
+  // randomLeanAnmation = 0.;
+  // windLeanAngle = 0.;
+
   float leanFactor = remap(hashVal.y, -1., 1., -0.5, 0.5) + randomLeanAnmation;
+
   // Debug
   // leanFactor = 1.;
 
@@ -178,13 +177,35 @@ void main() {
   // Blend normal
   float distanceBlend = smoothstep(0., 10., distance(cameraPosition, grassBladeWorldPos.xyz));
 
-  grassLocalNormal = mix(grassLocalNormal, vec3(0., 1., 0.), distanceBlend * .5);
+  grassLocalNormal = mix(grassLocalNormal, vec3(0., 1., 0.), distanceBlend * 0.5);
 
   grassLocalNormal = normalize(grassLocalNormal);
 
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(grassLocalPisition, 1.0);
+  // ViewSpace ticken
+  vec4 mvPosition = modelViewMatrix * vec4(grassLocalPisition, 1.0);
+
+  vec3 viewDir = normalize(cameraPosition - grassBladeWorldPos.xyz);
+  vec3 grassFaceNormal = grassMat * vec3(0., 0., -zSide);
+
+  float NdotL = saturate(dot(grassFaceNormal, viewDir));
+
+  float viewSpaceTickenFactor = easeOut(1. - NdotL, 4.) * smoothstep(0., .2, NdotL);
+
+  mvPosition.x += viewSpaceTickenFactor * (xSide - .5) * width * .5 * -zSide;
+
+  gl_Position = projectionMatrix * mvPosition;
+
+  // Remove grass below threshold
+  gl_Position.w = tileGrassHeight < .25 ? 0. : gl_Position.w;
+
+  // gl_Position = projectionMatrix * modelViewMatrix * vec4(grassLocalPisition, 1.0);
 
   vColor = mix(BASE_COLOR, TIP_COLOR, heightPercent);
+  vColor = mix(vec3(1., 0., 0.), vColor, stiffness);
+
+  // vColor = vec3(viewSpaceTickenFactor);
+
+  // vColor = grassLocalNormal;
 
   // vec3 c1 = mix(BASE_COLOR, TIP_COLOR, heightPercent);
   // vec3 c2 = mix(vec3(0.6, 0.6, 0.4), vec3(0.88, 0.87, 0.52), heightPercent);
@@ -193,9 +214,7 @@ void main() {
 
   // vColor = mix(c1, c2, smoothstep(-1., 1., noiseValue));
 
-  // vColor = grassLocalNormal;
-
-  vGrassData = vec4(x, 0., 0., 0.);
+  vGrassData = vec4(x, heightPercent, xSide, grassType);
 
   vNormal = normalize((modelMatrix * vec4(grassLocalNormal, 0.)).xyz);
 

@@ -9,16 +9,19 @@ const Ground = () => {
   const diffuseTex = useTexture(RES.textures.grid);
   diffuseTex.wrapS = diffuseTex.wrapT = RepeatWrapping;
 
+  const groundTex = useTexture(RES.textures.ground)
+
   const uniforms = useMemo(
     () => ({
       diffuseTexture: new Uniform(diffuseTex),
+      groundTex: new Uniform(groundTex),
     }),
     []
   );
 
   return (
     <>
-      <mesh rotation-x={-Math.PI / 2} scale={10}>
+      <mesh rotation-x={-Math.PI / 2} scale={50}>
         <planeGeometry args={[1, 1, 512, 512]} />
         <shaderMaterial
           vertexShader={groundVertexShader}
