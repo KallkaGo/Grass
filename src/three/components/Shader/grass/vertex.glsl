@@ -3,6 +3,7 @@
 varying vec4 vGrassData;
 varying vec3 vColor;
 varying vec3 vNormal;
+varying vec3 vTerrianNormal;
 varying vec3 vWorldPosition;
 varying float tileX;
 uniform vec4 grassParams;
@@ -62,7 +63,25 @@ vec3 bezierGrad(vec3 P0, vec3 P1, vec3 P2, vec3 P3, float t) {
 }
 
 vec3 terrianHeight(vec3 worldPos) {
-  return vec3(worldPos.x, noise(worldPos * .02) * 10.0, worldPos.z);
+  return vec3(worldPos.x, noise(worldPos * .02) * 15.0, worldPos.z);
+}
+
+vec3 terrianNormal(vec3 worldPos) {
+  float delta = .1;
+
+  vec3 curPos = terrianHeight(worldPos);
+
+  vec3 px = terrianHeight(worldPos + vec3(delta, 0., 0.));
+  vec3 pz = terrianHeight(worldPos + vec3(0., 0., delta));
+
+  vec3 tangent = px - curPos;
+
+  vec3 bitangent = pz - curPos;
+
+  vec3 normal = cross(bitangent, tangent);
+
+  return normalize(normal);
+
 }
 
 const vec3 BASE_COLOR = vec3(0.14, 0.56, 0.06);
@@ -178,6 +197,9 @@ void main() {
   // curve is only applied in the yz plane
   vec3 grassLocalNormal = grassMat * vec3(0., curveRot90 * curveGrad.yz);
 
+  // calculate terrian normal
+  vec3 terrianNormal_ = terrianNormal(vec3(grassOffset.x, 0., grassOffset.z));
+
   // Blend normal
   float distanceBlend = smoothstep(0., 10., distance(cameraPosition, grassBladeWorldPos.xyz));
 
@@ -221,6 +243,8 @@ void main() {
   vGrassData = vec4(x, heightPercent, xSide, grassType);
 
   vNormal = normalize((modelMatrix * vec4(grassLocalNormal, 0.)).xyz);
+
+  vTerrianNormal = terrianNormal_;
 
   vWorldPosition = (modelMatrix * vec4(grassLocalPisition, 1.0)).xyz;
 

@@ -3,6 +3,7 @@
 varying vec2 vUvs;
 varying float tileX;
 varying vec3 vNormal;
+varying vec3 vTerrianNormal;
 varying vec3 vWorldPosition;
 varying vec3 vColor;
 varying vec4 vGrassData;
@@ -33,7 +34,7 @@ vec3 phongSpecular(vec3 normal, vec3 lgihtDir, vec3 viewDir) {
   vec3 r = normalize(reflect(-lgihtDir, normal));
 
   float phongValue = max(0., dot(viewDir, r));
-  phongValue = pow(phongValue, 10.);
+  phongValue = pow(phongValue, 32.);
 
   vec3 specular = NdotL * vec3(phongValue);
 
@@ -65,6 +66,8 @@ void main() {
 
   vec3 normal = normalize(vNormal);
 
+  vec3 terrianNormal = normalize(vTerrianNormal);
+
   vec3 viewDir = normalize(cameraPosition - vWorldPosition);
 
   // diffuse
@@ -81,20 +84,21 @@ void main() {
   // Directional Light
   vec3 lightDir = normalize(vec3(-1., .5, 1.));
   vec3 lightColor = vec3(1.);
-  // vec3 diffuseLighting = lambertLight(normal, viewDir, lightDir, lightColor);
+  vec3 diffuseLighting = lambertLight(terrianNormal, viewDir, lightDir, lightColor);
 
   // Specular
-  vec3 specular = phongSpecular(normal, lightDir, viewDir);
+  vec3 specular = phongSpecular(terrianNormal, lightDir, viewDir);
 
   // AO
-  float ao = remap(pow(grassY, 2.), 0., 1., .7, 1.);
+  float ao = remap(pow(grassY, 2.), 0., 1., .6, 1.);
 
-  // vec3 lighting = diffuseLighting * .5 + ambientLight * .5;
+  vec3 lighting = diffuseLighting * .2 + ambientLight * .8;
 
-  vec3 albedo = baseColor.rgb * ambientLight + specular * .15;
+  vec3 albedo = baseColor.rgb * lighting + specular * .25;
+
+  // albedo = specular;
 
   albedo *= ao;
-  // color = lighting;
 
   // gamma correct
   gl_FragColor = vec4(pow(albedo, vec3(1.0 / 2.2)), 1.0);
