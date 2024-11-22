@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Sky from "./Sky";
 import Ground from "./Ground";
 import Grass from "./Grass";
+import { useControls } from "leva";
 
 const Sketch = () => {
   const controlDom = useInteractStore((state) => state.controlDom);
@@ -12,6 +13,7 @@ const Sketch = () => {
     useLoadedStore.setState({ ready: true });
   }, []);
 
+
   return (
     <>
       <OrbitControls domElement={controlDom} />
@@ -19,6 +21,7 @@ const Sketch = () => {
       <Sky />
       <Ground />
       <Grass />
+    
     </>
   );
 };

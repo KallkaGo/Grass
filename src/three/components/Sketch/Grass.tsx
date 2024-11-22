@@ -16,8 +16,9 @@ import { useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import RES from "../RES";
 import { useTextureAtlas } from "@utils/useTextureAtlas";
+import { useControls } from "leva";
 
-const NUM_GRASS = 32 * 1024 ;
+const NUM_GRASS = 32 * 1024;
 const GRASS_SEGMENTS = 6;
 const GRASS_VERTICES = (GRASS_SEGMENTS + 1) * 2;
 const GRASS_PATCH_SIZE = 25;
@@ -74,6 +75,7 @@ const Grass = () => {
       time: new Uniform(0),
       tileDataTexture: new Uniform(tileDataTex),
       grassDiffuseTex: new Uniform(grassDiffuse),
+      playerPos: new Uniform(new Vector3()),
     }),
     []
   );
@@ -85,6 +87,17 @@ const Grass = () => {
     uniforms.time.value += delta;
   });
 
+  // const { position } = useControls("box", {
+  //   position: {
+  //     value: [0, 0, 0],
+  //     step: 0.1,
+  //     onChange: (v) => {
+  //       uniforms.playerPos.value = new Vector3(...v);
+  //     },
+  //     transient: false,
+  //   },
+  // });
+
   return (
     <>
       <mesh geometry={geometry}>
@@ -94,6 +107,13 @@ const Grass = () => {
           uniforms={uniforms}
         ></shaderMaterial>
       </mesh>
+      {/* 
+      Testing interactions
+      */}
+      {/* <mesh position={position} >
+        <boxGeometry args={[1, 1, 1]} />
+        <meshBasicMaterial color={"red"} />
+      </mesh> */}
     </>
   );
 };

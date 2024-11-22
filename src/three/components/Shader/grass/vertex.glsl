@@ -9,6 +9,7 @@ varying float tileX;
 uniform vec4 grassParams;
 uniform sampler2D tileDataTexture;
 uniform float time;
+uniform vec3 playerPos;
 
 #define PI 3.14159
 
@@ -108,10 +109,27 @@ void main() {
   // Grass rotation
   float angle = remap(hashVal.x, -1., 1., -PI, PI);
   // -x map 0 x map 1
-  vec4 tileData = texture2D(tileDataTexture, vec2(grassBladeWorldPos.x, grassBladeWorldPos.z) / GRASS_PATCH_SIZE * .5 + .5);
+  vec2 uv = vec2(grassOffset.x, grassOffset.z) / GRASS_PATCH_SIZE * .5 + .5;
+
+  vec4 tileData = texture2D(tileDataTexture, uv);
 
   // Grass Type
   float grassType = saturate(hashVal.z) > .75 ? 1. : 0.;
+
+  vec3 playPos = playerPos;
+
+  float distanceTograss = distance(playPos, vec3(grassBladeWorldPos.x, 0., grassBladeWorldPos.z));
+
+  float radio = clamp(distanceTograss / 1.5, 0.0, 1.0);
+  // Debug
+  radio = 1.;
+
+  float deltaX = playPos.x - grassBladeWorldPos.x;
+  float deltaZ = playPos.z - grassBladeWorldPos.z;
+
+  float angleToGrass = atan(deltaZ, deltaX);
+
+  float res = (angle > 1.5708 || angle < -1.5708) ? 1. : -1.;
 
   // Stiffness
   float stiffness = 1.0;
@@ -150,19 +168,21 @@ void main() {
   float y = heightPercent * height;
   float z = 0.;
 
-  // float offset = float(gl_InstanceID) * .5;
-
   // Grass lean factor
 
-  float windStrength = noise(vec3(grassBladeWorldPos.xz * .05, 0.) + time * .5);
-  float windAngle = PI / 4.;
-  vec3 windAxis = vec3(cos(windAngle), 0., sin(windAngle));
-  float windLeanAngle = windStrength * 1.5 * heightPercent * stiffness;
+  float windStrength = mix(res, noise(vec3(grassBladeWorldPos.xz * .05, 0.) + time * .5), radio);
+  // float windStrength = noise(vec3(grassBladeWorldPos.xz * .05, 0.) + time * .5);
+
+  float windAngle = mix(angleToGrass, PI / 4., radio);
+  // windAngle = 0.;
+  // float windAngle = angleToGrass;
+  vec3 windAxis = vec3(sin(windAngle), 0., cos(windAngle));
+  float windLeanAngle = windStrength * 1.5 * heightPercent * stiffness * mix(2.5, 1., radio);
   // float randomLeanAnmation = sin(time * 2. + hashVal.y) * .025;
   float randomLeanAnmation = noise(vec3(grassBladeWorldPos.xz, time * 4.)) * (windStrength * .5 + .125);
 
   // debug
-  // randomLeanAnmation = 0.;
+  randomLeanAnmation = 0.;
   // windLeanAngle = 0.;
 
   float leanFactor = remap(hashVal.y, -1., 1., -0.5, 0.5) + randomLeanAnmation;
