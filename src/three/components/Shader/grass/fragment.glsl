@@ -100,6 +100,8 @@ void main() {
 
   albedo *= ao;
 
+  // albedo = vColor;
+
   // gamma correct
   gl_FragColor = vec4(pow(albedo, vec3(1.0 / 2.2)), 1.0);
 }

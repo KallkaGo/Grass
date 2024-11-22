@@ -108,6 +108,7 @@ void main() {
 
   // Grass rotation
   float angle = remap(hashVal.x, -1., 1., -PI, PI);
+
   // -x map 0 x map 1
   vec2 uv = vec2(grassOffset.x, grassOffset.z) / GRASS_PATCH_SIZE * .5 + .5;
 
@@ -123,13 +124,6 @@ void main() {
   float radio = clamp(distanceTograss / 1.5, 0.0, 1.0);
   // Debug
   radio = 1.;
-
-  float deltaX = playPos.x - grassBladeWorldPos.x;
-  float deltaZ = playPos.z - grassBladeWorldPos.z;
-
-  float angleToGrass = atan(deltaZ, deltaX);
-
-  float res = (angle > 1.5708 || angle < -1.5708) ? 1. : -1.;
 
   // Stiffness
   float stiffness = 1.0;
@@ -154,12 +148,9 @@ void main() {
 
   float heightPercent = float(vertex_ID - xTest) / (float(GRASS_SEGMENTS) * 2.);
 
-  // float width = GRASS_WIDTH * easeOut(1. - heightPercent, 4.);
-
   float width = GRASS_WIDTH * mix(1., smoothstep(0., .25, 1. - heightPercent), step(tileData.x, .7)) * tileGrassHeight;
-
+  // float width = GRASS_WIDTH * easeOut(1. - heightPercent, 4.);
   // float width = GRASS_WIDTH * smoothstep(0., .25, 1. - heightPercent) * tileGrassHeight;
-
   // float width = GRASS_WIDTH;
 
   float height = GRASS_HEIGHT * tileGrassHeight * remap(hashVal.y, -1., 1., .7, 1.) * max(1., mix(1., 1.5, grassType) * tileData.x);
@@ -169,26 +160,23 @@ void main() {
   float z = 0.;
 
   // Grass lean factor
+  float windStrength = noise(vec3(grassBladeWorldPos.xz * .05, 0.) + time * .5);
 
-  float windStrength = mix(res, noise(vec3(grassBladeWorldPos.xz * .05, 0.) + time * .5), radio);
-  // float windStrength = noise(vec3(grassBladeWorldPos.xz * .05, 0.) + time * .5);
-
-  float windAngle = mix(angleToGrass, PI / 4., radio);
+  float windAngle = PI / 4.;
+  /* Debug */
   // windAngle = 0.;
-  // float windAngle = angleToGrass;
   vec3 windAxis = vec3(sin(windAngle), 0., cos(windAngle));
-  float windLeanAngle = windStrength * 1.5 * heightPercent * stiffness * mix(2.5, 1., radio);
-  // float randomLeanAnmation = sin(time * 2. + hashVal.y) * .025;
+  float windLeanAngle = windStrength * 1.5 * heightPercent * stiffness;
   float randomLeanAnmation = noise(vec3(grassBladeWorldPos.xz, time * 4.)) * (windStrength * .5 + .125);
 
-  // debug
-  randomLeanAnmation = 0.;
+  /* Debug */
+  // randomLeanAnmation = 0.;
   // windLeanAngle = 0.;
 
   float leanFactor = remap(hashVal.y, -1., 1., -0.5, 0.5) + randomLeanAnmation;
 
-  // Debug
-  // leanFactor = 1.;
+  /* Debug */
+  // leanFactor = 0.;
 
   // Add the bezier curve for bend
   vec3 p1 = vec3(0.);
@@ -212,13 +200,23 @@ void main() {
   // Generate grass matrix
   mat3 grassMat = rotateAxis(windAxis, windLeanAngle) * rotateY(angle);
 
-  vec3 grassLocalPisition = grassMat * vec3(x, y, z) + grassOffset;
-
   // curve is only applied in the yz plane
   vec3 grassLocalNormal = grassMat * vec3(0., curveRot90 * curveGrad.yz);
 
   // calculate terrian normal
   vec3 terrianNormal_ = terrianNormal(vec3(grassOffset.x, 0., grassOffset.z));
+
+  vec3 grassFaceNormal = grassMat * vec3(0., 0., -zSide);
+
+  vec3 impactDir = normalize(vec3(grassBladeWorldPos.x - playerPos.x, 0., grassBladeWorldPos.z - playerPos.z));
+
+  const vec3 upVector = vec3(0., 1., 0.);
+
+  vec3 impactAxis = normalize(cross(upVector, impactDir));
+
+  grassMat = rotateAxis(impactAxis, (-PI * (1. - radio) / 4.)) * grassMat;
+
+  vec3 grassLocalPisition = grassMat * vec3(x, y, z) + grassOffset;
 
   // Blend normal
   float distanceBlend = smoothstep(0., 10., distance(cameraPosition, grassBladeWorldPos.xyz));
@@ -231,7 +229,6 @@ void main() {
   vec4 mvPosition = modelViewMatrix * vec4(grassLocalPisition, 1.0);
 
   vec3 viewDir = normalize(cameraPosition - grassBladeWorldPos.xyz);
-  vec3 grassFaceNormal = grassMat * vec3(0., 0., -zSide);
 
   float NdotL = saturate(dot(grassFaceNormal, viewDir));
 
@@ -241,17 +238,12 @@ void main() {
 
   gl_Position = projectionMatrix * mvPosition;
 
-  // gl_Position = projectionMatrix * modelViewMatrix * vec4(grassLocalPisition, 1.0);
-
   // Remove grass below threshold
   gl_Position.w = tileGrassHeight < .25 ? 0. : gl_Position.w;
 
+  //Varying assignment area
   // vColor = mix(BASE_COLOR, TIP_COLOR, heightPercent);
   // vColor = mix(vec3(1., 0., 0.), vColor, stiffness);
-
-  // vColor = vec3(viewSpaceTickenFactor);
-
-  // vColor = grassLocalNormal;
 
   vec3 c1 = mix(BASE_COLOR, TIP_COLOR, heightPercent);
   vec3 c2 = mix(vec3(0.6, 0.6, 0.4), vec3(0.88, 0.87, 0.52), heightPercent);

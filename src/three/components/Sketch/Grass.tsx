@@ -111,7 +111,7 @@ const Grass = () => {
       Testing interactions
       */}
       {/* <mesh position={position} >
-        <boxGeometry args={[1, 1, 1]} />
+        <sphereGeometry args={[0.5, 64, 64]} />
         <meshBasicMaterial color={"red"} />
       </mesh> */}
     </>
