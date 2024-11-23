@@ -1,8 +1,9 @@
 import { useGLTF } from "@react-three/drei";
 import RES from "../RES";
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import CustomShaderMaterial from "three-custom-shader-material/vanilla";
 import {
+  Box3,
   Euler,
   Group,
   Mesh,
@@ -19,7 +20,6 @@ import vertexShader from "../Shader/ball/vertex.glsl";
 import { useControls } from "leva";
 import { useGameStore } from "@utils/Store";
 
-
 const Ball = () => {
   const gltf = useGLTF(RES.models.masterBall);
 
@@ -34,17 +34,20 @@ const Ball = () => {
   const uniforms = useMemo(
     () => ({
       uBallPos: new Uniform(new Vector3(0)),
+      halfHeight: new Uniform(0),
     }),
     []
   );
 
-  useLayoutEffect(() => {
-    console.log("gltf", gltf);
+  useEffect(() => {
     gltf.scene.traverse((child: Object3D) => {
       if ((child as Mesh).isMesh) {
         const mesh = child as Mesh;
         const oldMat = mesh.material as MeshStandardMaterial;
         mesh.material = new CustomShaderMaterial({
+          defines: {
+            CSM_SHADER: "",
+          },
           baseMaterial: MeshToonMaterial,
           map: oldMat.map,
           vertexShader: vertexShader,
@@ -53,6 +56,9 @@ const Ball = () => {
         });
       }
     });
+    const boundingBox = new Box3().setFromObject(gltf.scene);
+    const halfHeight = Math.floor((boundingBox.max.y - boundingBox.min.y) / 2);
+    uniforms.halfHeight.value = halfHeight;
   }, []);
 
   useControls("ball", {
@@ -64,18 +70,16 @@ const Ball = () => {
       max: 25,
       min: -25,
       step: 0.1,
+      joystick: false,
       onChange: (val) => {
         const lastPos = new Vector3().copy(uniforms.uBallPos.value);
         const deltaX = val.x - lastPos.x;
         const deltaZ = val.z - lastPos.z;
         const { direction, upDir } = baseParams.current;
 
-        console.log(deltaX, deltaZ);
-
         direction.set(deltaX, 0, deltaZ).normalize();
 
         const axis = upDir.clone().cross(direction).normalize();
-        
 
         const angle = Math.PI / 20;
 

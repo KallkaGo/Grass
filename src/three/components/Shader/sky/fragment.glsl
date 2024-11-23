@@ -14,7 +14,7 @@ void main() {
   blackT *= smoothstep(0.0, 1.0, uv.y) * smoothstep(1.0, 0.0, uv.x);
 
   vec3 colour = mix(COLOUR_LIGHT_BLUE, COLOUR_BRIGHT_BLUE, blueT);
-  colour = mix(colour, COLOUR_DARK_YELLOW, yellowT * 0.75);
+  colour = mix(colour, COLOUR_LIGHT_RED, yellowT * 0.75);
   colour = mix(colour, vec3(0.0), blackT * 0.75);
 
   gl_FragColor = vec4(pow(colour, vec3(1.0 / 2.2)), 1.0);

@@ -7,9 +7,13 @@ float remap(float v, float inMin, float inMax, float outMin, float outMax) {
   return mix(outMin, outMax, t);
 }
 
+#ifndef CSM_SHADER
+
 float saturate(float x) {
   return clamp(x, 0.0, 1.0);
 }
+
+#endif
 
 // The MIT License
 // Copyright © 2013 Inigo Quilez
