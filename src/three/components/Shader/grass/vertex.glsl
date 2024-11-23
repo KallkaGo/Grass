@@ -121,7 +121,7 @@ void main() {
 
   float distanceTograss = distance(playPos, vec3(grassBladeWorldPos.x, 0., grassBladeWorldPos.z));
 
-  float radio = clamp(distanceTograss / 2., 0.0, 1.0);
+  float tiltFactor = clamp(distanceTograss / 3., 0.0, 1.0);
   // Debug
   // radio = 1.;
 
@@ -166,7 +166,7 @@ void main() {
   /* Debug */
   // windAngle = 0.;
   vec3 windAxis = vec3(sin(windAngle), 0., cos(windAngle));
-  float windLeanAngle = windStrength * 1.5 * heightPercent * stiffness;
+  float windLeanAngle = windStrength * 1.5 * heightPercent * stiffness * clamp(tiltFactor, 0.05, 1.);
   float randomLeanAnmation = noise(vec3(grassBladeWorldPos.xz, time * 4.)) * (windStrength * .5 + .125);
 
   /* Debug */
@@ -214,7 +214,7 @@ void main() {
 
   vec3 impactAxis = normalize(cross(upVector, impactDir));
 
-  grassMat = rotateAxis(impactAxis, (-PI * (1. - radio) / 4.)) * grassMat;
+  grassMat = rotateAxis(impactAxis, (-PI * (1. - tiltFactor) / 4.)) * grassMat;
 
   vec3 grassLocalPisition = grassMat * vec3(x, y, z) + grassOffset;
 
