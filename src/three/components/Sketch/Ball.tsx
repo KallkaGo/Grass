@@ -6,6 +6,7 @@ import {
   Euler,
   Group,
   Mesh,
+  MeshBasicMaterial,
   MeshStandardMaterial,
   MeshToonMaterial,
   Object3D,
@@ -38,7 +39,7 @@ const Ball = () => {
         const oldMat = mesh.material as MeshStandardMaterial;
         mesh.material = new CustomShaderMaterial({
           baseMaterial: MeshToonMaterial,
-          color: oldMat.color,
+          map: oldMat.map,
           vertexShader: vertexShader,
           silent: true,
           uniforms: uniforms,
@@ -73,9 +74,9 @@ const Ball = () => {
 
   return (
     <>
-      <directionalLight position={[10, 10, 10]} />
-      <ambientLight />
       <primitive object={gltf.scene} scale={20} ref={modelRef} />
+      <directionalLight position={[10, 10, 10]} />
+      <ambientLight  intensity={2}/>
     </>
   );
 };

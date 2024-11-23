@@ -123,7 +123,7 @@ void main() {
 
   float tiltFactor = clamp(distanceTograss / 3., 0.0, 1.0);
   // Debug
-  // radio = 1.;
+  // tiltFactor = 1.;
 
   // Stiffness
   float stiffness = 1.0;
