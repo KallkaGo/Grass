@@ -19,10 +19,17 @@ import vertexShader from "../Shader/ball/vertex.glsl";
 import { useControls } from "leva";
 import { useGameStore } from "@utils/Store";
 
+
 const Ball = () => {
   const gltf = useGLTF(RES.models.masterBall);
 
   const modelRef = useRef<Group>(null);
+
+  const baseParams = useRef({
+    upDir: new Vector3(0, 1, 0),
+    direction: new Vector3(0, 0, 0),
+    angle: 0,
+  });
 
   const uniforms = useMemo(
     () => ({
@@ -61,8 +68,21 @@ const Ball = () => {
         const lastPos = new Vector3().copy(uniforms.uBallPos.value);
         const deltaX = val.x - lastPos.x;
         const deltaZ = val.z - lastPos.z;
-        modelRef.current!.rotation.z -= deltaX;
-        modelRef.current!.rotation.x += deltaZ;
+        const { direction, upDir } = baseParams.current;
+
+        console.log(deltaX, deltaZ);
+
+        direction.set(deltaX, 0, deltaZ).normalize();
+
+        const axis = upDir.clone().cross(direction).normalize();
+        
+
+        const angle = Math.PI / 20;
+
+        const q = new Quaternion().setFromAxisAngle(axis, angle);
+
+        modelRef.current!.quaternion.premultiply(q);
+
         uniforms.uBallPos.value.set(val.x, 0, val.z);
 
         useGameStore.setState({
@@ -76,7 +96,7 @@ const Ball = () => {
     <>
       <primitive object={gltf.scene} scale={20} ref={modelRef} />
       <directionalLight position={[10, 10, 10]} />
-      <ambientLight  intensity={2}/>
+      <ambientLight intensity={2} />
     </>
   );
 };
