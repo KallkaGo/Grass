@@ -6,13 +6,13 @@ import Ground from "./Ground";
 import Grass from "./Grass";
 import { useControls } from "leva";
 import { useThree } from "@react-three/fiber";
+import Ball from "./Ball";
 
 const Sketch = () => {
   const controlDom = useInteractStore((state) => state.controlDom);
 
   useEffect(() => {
     useLoadedStore.setState({ ready: true });
-
   }, []);
 
   return (
@@ -22,6 +22,7 @@ const Sketch = () => {
       <Sky />
       <Ground />
       <Grass />
+      <Ball />
     </>
   );
 };

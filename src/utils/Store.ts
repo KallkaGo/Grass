@@ -1,3 +1,4 @@
+import { Vector3 } from "three";
 import { create } from "zustand";
 /**
  * 用户交互状态
@@ -18,6 +19,7 @@ const useGameStore = create(() => ({
     time: 0,
     transfer: false,
     bodyColor:'#26d6e9',
+    BallPos: new Vector3(0, 0, 0),
 }));
 
 const useLoadedStore = create(() => ({

@@ -121,9 +121,9 @@ void main() {
 
   float distanceTograss = distance(playPos, vec3(grassBladeWorldPos.x, 0., grassBladeWorldPos.z));
 
-  float radio = clamp(distanceTograss / 1.5, 0.0, 1.0);
+  float radio = clamp(distanceTograss / 2., 0.0, 1.0);
   // Debug
-  radio = 1.;
+  // radio = 1.;
 
   // Stiffness
   float stiffness = 1.0;

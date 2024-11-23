@@ -17,6 +17,7 @@ import { useTexture } from "@react-three/drei";
 import RES from "../RES";
 import { useTextureAtlas } from "@utils/useTextureAtlas";
 import { useControls } from "leva";
+import { useGameStore } from "@utils/Store";
 
 const NUM_GRASS = 32 * 1024;
 const GRASS_SEGMENTS = 6;
@@ -85,18 +86,9 @@ const Grass = () => {
     const dpr = state.gl.getPixelRatio();
     uniforms.resolution.value.set(innerWidth * dpr, innerHeight * dpr);
     uniforms.time.value += delta;
+    const ballPos = useGameStore.getState().BallPos;
+    uniforms.playerPos.value.set(ballPos.x, 0, ballPos.z);
   });
-
-  // const { position } = useControls("box", {
-  //   position: {
-  //     value: [0, 0, 0],
-  //     step: 0.1,
-  //     onChange: (v) => {
-  //       uniforms.playerPos.value = new Vector3(...v);
-  //     },
-  //     transient: false,
-  //   },
-  // });
 
   return (
     <>
@@ -107,13 +99,6 @@ const Grass = () => {
           uniforms={uniforms}
         ></shaderMaterial>
       </mesh>
-      {/* 
-      Testing interactions
-      */}
-      {/* <mesh position={position} >
-        <sphereGeometry args={[0.5, 64, 64]} />
-        <meshBasicMaterial color={"red"} />
-      </mesh> */}
     </>
   );
 };
