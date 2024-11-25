@@ -166,8 +166,8 @@ void main() {
   /* Debug */
   // windAngle = 0.;
   vec3 windAxis = vec3(sin(windAngle), 0., cos(windAngle));
-  float windLeanAngle = windStrength * 1.5 * heightPercent * stiffness * clamp(tiltFactor, 0.05, 1.);
-  float randomLeanAnmation = noise(vec3(grassBladeWorldPos.xz, time * 4.)) * (windStrength * .5 + .125);
+  float windLeanAngle = windStrength * 1.5 * heightPercent * stiffness * clamp(tiltFactor, .05, 1.);
+  float randomLeanAnmation = noise(vec3(grassBladeWorldPos.xz, time * 4.)) * (windStrength * .5 + .125) * clamp(tiltFactor, .2, 1.);
 
   /* Debug */
   // randomLeanAnmation = 0.;
