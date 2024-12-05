@@ -8,7 +8,8 @@ varying vec3 vWorldPosition;
 varying vec3 vColor;
 varying vec4 vGrassData;
 uniform vec2 resolution;
-uniform sampler2DArray grassDiffuseTex;
+// uniform sampler2DArray grassDiffuseTex;
+uniform sampler2D grassDiffuseTex;
 
 vec3 hemiLight(vec3 normal, vec3 groundColor, vec3 skyColor) {
   return mix(groundColor, skyColor, .5 * normal.y + .5);
@@ -43,7 +44,10 @@ vec3 phongSpecular(vec3 normal, vec3 lgihtDir, vec3 viewDir) {
 
 vec4 grassDiffuse(vec2 uv, float grassType) {
 
-  vec4 diffuse = texture2D(grassDiffuseTex, vec3(uv, grassType));
+  // vec4 diffuse = texture2D(grassDiffuseTex, vec3(uv, grassType));
+
+  // cuz the texture atlas is from top to bottom
+  vec4 diffuse = texture2D(grassDiffuseTex, vec2(uv.x, 1. + (uv.y - grassType - 1.) / 2.));
 
   vec4 mixColor = min(vec4(1.), vec4(vColor, 1.) * 1.2);
 

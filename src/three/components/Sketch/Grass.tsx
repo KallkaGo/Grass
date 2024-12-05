@@ -4,6 +4,7 @@ import {
   InstancedBufferGeometry,
   RepeatWrapping,
   Sphere,
+  SRGBColorSpace,
   Uniform,
   Vector2,
   Vector3,
@@ -31,10 +32,14 @@ const Grass = () => {
   tileDataTex.flipY = false;
 
   // grass diffuse
-  const grassDiffuse = useTextureAtlas([
-    RES.textures.grass1,
-    RES.textures.grass2,
-  ]);
+  // ex 1:
+  // const grassDiffuse = useTextureAtlas([
+  //   RES.textures.grass1,
+  //   RES.textures.grass2,
+  // ]);
+
+  // ex 2:
+  const grassDiffuse = useTexture(RES.textures.grass);
 
   const geometry = useMemo(() => {
     const indices: number[] = [];
