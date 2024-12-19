@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components'
 
 export const GameWrapper = styled.div`
     width: 100%;
@@ -32,4 +32,4 @@ export const GameWrapper = styled.div`
     border-radius:50%;
     border:2px solid #fff;
    }
-`;
+`

@@ -1,34 +1,35 @@
-import { PointerEvent, useEffect, useRef, useState } from "react";
-import { useGameStore, useInteractStore } from "@utils/Store";
-import { GameWrapper } from "./style";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
+import type { PointerEvent } from 'react'
+import { useGSAP } from '@gsap/react'
+import { useInteractStore } from '@utils/Store'
+import gsap from 'gsap'
+import { useEffect, useRef } from 'react'
+import { GameWrapper } from './style'
 
-const Game = () => {
-  const controlRef = useRef<HTMLDivElement>(null);
-  const gameRef = useRef<HTMLDivElement>(null);
-  const aniDone = useRef(false);
+function Game() {
+  const controlRef = useRef<HTMLDivElement>(null)
+  const gameRef = useRef<HTMLDivElement>(null)
+  const aniDone = useRef(false)
 
   useGSAP(() => {
-    gsap.set(gameRef.current, { opacity: 0 });
+    gsap.set(gameRef.current, { opacity: 0 })
     gsap.to(gameRef.current, {
       opacity: 1,
       duration: 0.5,
-      ease: "power2.in",
+      ease: 'power2.in',
       onComplete: () => {
-        aniDone.current = true;
+        aniDone.current = true
       },
-    });
-  });
+    })
+  })
 
   useEffect(() => {
-    useInteractStore.setState({ controlDom: controlRef.current! });
-  }, []);
+    useInteractStore.setState({ controlDom: controlRef.current! })
+  }, [])
 
   const handlePointerEvent = (e: PointerEvent, flag: boolean) => {
-    console.log(e.type, flag);
-    useInteractStore.setState({ touch: flag });
-  };
+    console.log(e.type, flag)
+    useInteractStore.setState({ touch: flag })
+  }
 
   return (
     <>
@@ -36,12 +37,13 @@ const Game = () => {
         <div
           className="control"
           ref={controlRef}
-          onPointerDown={(e) => handlePointerEvent(e, true)}
-          onPointerUp={(e) => handlePointerEvent(e, false)}
-        ></div>
+          onPointerDown={e => handlePointerEvent(e, true)}
+          onPointerUp={e => handlePointerEvent(e, false)}
+        >
+        </div>
       </GameWrapper>
     </>
-  );
-};
+  )
+}
 
-export default Game;
+export default Game

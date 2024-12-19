@@ -1,67 +1,66 @@
-import { useGLTF } from "@react-three/drei";
-import RES from "../RES";
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import CustomShaderMaterial from "three-custom-shader-material/vanilla";
-import {
-  Box3,
-  Euler,
+import type {
   Group,
   Mesh,
-  MeshBasicMaterial,
   MeshStandardMaterial,
-  MeshToonMaterial,
   Object3D,
+} from 'three'
+import { useGLTF } from '@react-three/drei'
+import { useGameStore } from '@utils/Store'
+import { useControls } from 'leva'
+import { useEffect, useMemo, useRef } from 'react'
+import {
+  Box3,
+  MeshToonMaterial,
   Quaternion,
   Uniform,
-  Vector2,
   Vector3,
-} from "three";
-import vertexShader from "../Shader/ball/vertex.glsl";
-import { useControls } from "leva";
-import { useGameStore } from "@utils/Store";
+} from 'three'
+import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
+import RES from '../RES'
+import vertexShader from '../Shader/ball/vertex.glsl'
 
-const Ball = () => {
-  const gltf = useGLTF(RES.models.masterBall);
+function Ball() {
+  const gltf = useGLTF(RES.models.masterBall)
 
-  const modelRef = useRef<Group>(null);
+  const modelRef = useRef<Group>(null)
 
   const baseParams = useRef({
     upDir: new Vector3(0, 1, 0),
     direction: new Vector3(0, 0, 0),
     angle: 0,
-  });
+  })
 
   const uniforms = useMemo(
     () => ({
       uBallPos: new Uniform(new Vector3(0)),
       halfHeight: new Uniform(0),
     }),
-    []
-  );
+    [],
+  )
 
   useEffect(() => {
     gltf.scene.traverse((child: Object3D) => {
       if ((child as Mesh).isMesh) {
-        const mesh = child as Mesh;
-        const oldMat = mesh.material as MeshStandardMaterial;
+        const mesh = child as Mesh
+        const oldMat = mesh.material as MeshStandardMaterial
         mesh.material = new CustomShaderMaterial({
           defines: {
-            CSM_SHADER: "",
+            CSM_SHADER: '',
           },
           baseMaterial: MeshToonMaterial,
           map: oldMat.map,
-          vertexShader: vertexShader,
+          vertexShader,
           silent: true,
-          uniforms: uniforms,
-        });
+          uniforms,
+        })
       }
-    });
-    const boundingBox = new Box3().setFromObject(gltf.scene);
-    const halfHeight = Math.floor((boundingBox.max.y - boundingBox.min.y) / 2);
-    uniforms.halfHeight.value = halfHeight;
-  }, []);
+    })
+    const boundingBox = new Box3().setFromObject(gltf.scene)
+    const halfHeight = Math.floor((boundingBox.max.y - boundingBox.min.y) / 2)
+    uniforms.halfHeight.value = halfHeight
+  }, [])
 
-  useControls("ball", {
+  useControls('ball', {
     position: {
       value: {
         x: 0,
@@ -70,31 +69,31 @@ const Ball = () => {
       max: 25,
       min: -25,
       step: 0.1,
-      joystick: false,
+      invert: true,
       onChange: (val) => {
-        const lastPos = new Vector3().copy(uniforms.uBallPos.value);
-        const deltaX = val.x - lastPos.x;
-        const deltaZ = val.z - lastPos.z;
-        const { direction, upDir } = baseParams.current;
+        const lastPos = new Vector3().copy(uniforms.uBallPos.value)
+        const deltaX = val.x - lastPos.x
+        const deltaZ = val.z - lastPos.z
+        const { direction, upDir } = baseParams.current
 
-        direction.set(deltaX, 0, deltaZ).normalize();
+        direction.set(deltaX, 0, deltaZ).normalize()
 
-        const axis = upDir.clone().cross(direction).normalize();
+        const axis = upDir.clone().cross(direction).normalize()
 
-        const angle = Math.PI / 20;
+        const angle = Math.PI / 20
 
-        const q = new Quaternion().setFromAxisAngle(axis, angle);
+        const q = new Quaternion().setFromAxisAngle(axis, angle)
 
-        modelRef.current!.quaternion.premultiply(q);
+        modelRef.current!.quaternion.premultiply(q)
 
-        uniforms.uBallPos.value.set(val.x, 0, val.z);
+        uniforms.uBallPos.value.set(val.x, 0, val.z)
 
         useGameStore.setState({
           BallPos: useGameStore.getState().BallPos.set(val.x, 0, val.z),
-        });
+        })
       },
     },
-  });
+  })
 
   return (
     <>
@@ -102,7 +101,7 @@ const Ball = () => {
       <directionalLight position={[10, 10, 10]} />
       <ambientLight intensity={2} />
     </>
-  );
-};
+  )
+}
 
-export default Ball;
+export default Ball

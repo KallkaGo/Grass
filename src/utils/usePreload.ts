@@ -1,20 +1,21 @@
-import { useEffect } from "react";
-const usePreloadImages = (images: string[], onImagesLoaded?: (loadedImages: string[]) => void) => {
+import { useEffect } from 'react'
+
+function usePreloadImages(images: string[], onImagesLoaded?: (loadedImages: string[]) => void) {
   useEffect(() => {
-    const loaded: string[] = [];
+    const loaded: string[] = []
     for (const imageUrl of images) {
-      const image = new Image();
-      image.src = imageUrl;
+      const image = new Image()
+      image.src = imageUrl
       image.onload = () => {
-        loaded.push(imageUrl);
+        loaded.push(imageUrl)
         if (loaded.length === images.length) {
-          onImagesLoaded && onImagesLoaded(loaded);
+          onImagesLoaded && onImagesLoaded(loaded)
         }
-      };
+      }
     }
-  }, []);
+  }, [])
 }
 
 export {
-  usePreloadImages
-};
+  usePreloadImages,
+}

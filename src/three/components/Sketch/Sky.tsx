@@ -1,21 +1,21 @@
-import { useMemo } from "react";
-import { BackSide, Uniform, Vector2 } from "three";
-import skyVertexShader from "../Shader/sky/vertex.glsl";
-import skyFragmentShader from "../Shader/sky/fragment.glsl";
-import { useFrame } from "@react-three/fiber";
+import { useFrame } from '@react-three/fiber'
+import { useMemo } from 'react'
+import { BackSide, Uniform, Vector2 } from 'three'
+import skyFragmentShader from '../Shader/sky/fragment.glsl'
+import skyVertexShader from '../Shader/sky/vertex.glsl'
 
-const Sky = () => {
+function Sky() {
   const uniforms = useMemo(
     () => ({
       resolution: new Uniform(new Vector2(1, 1)),
     }),
-    []
-  );
+    [],
+  )
 
   useFrame((state, delta) => {
-    const dpr = state.gl.getPixelRatio();
-    uniforms.resolution.value.set(innerWidth * dpr, innerHeight * dpr);
-  });
+    const dpr = state.gl.getPixelRatio()
+    uniforms.resolution.value.set(innerWidth * dpr, innerHeight * dpr)
+  })
 
   return (
     <>
@@ -26,10 +26,11 @@ const Sky = () => {
           vertexShader={skyVertexShader}
           fragmentShader={skyFragmentShader}
           uniforms={uniforms}
-        ></shaderMaterial>
+        >
+        </shaderMaterial>
       </mesh>
     </>
-  );
-};
+  )
+}
 
-export default Sky;
+export default Sky

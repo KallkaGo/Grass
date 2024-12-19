@@ -1,16 +1,12 @@
-import { useFBO } from "@react-three/drei"
-import { useFrame, useThree } from "@react-three/fiber"
-import { useMemo } from "react"
-import { DepthFormat, DepthTexture, NearestFilter, RGBAFormat, ShaderMaterial, Texture, Uniform, UnsignedByteType, UnsignedShortType } from "three"
-import { FullScreenQuad } from "three/examples/jsm/Addons.js"
+import type { Texture } from 'three'
+import { useFBO } from '@react-three/drei'
+import { useFrame, useThree } from '@react-three/fiber'
+import { useMemo } from 'react'
+import { DepthFormat, DepthTexture, RGBAFormat, ShaderMaterial, Uniform, UnsignedShortType } from 'three'
+import { FullScreenQuad } from 'three/examples/jsm/Addons.js'
 
-
-
-
-
-const useDepthTexture = (width: number, height: number) => {
-
-  const camera = useThree((state) => state.camera)
+function useDepthTexture(width: number, height: number) {
+  const camera = useThree(state => state.camera)
 
   const rt1 = useFBO(width, height, {
     depthBuffer: true,
@@ -30,23 +26,22 @@ const useDepthTexture = (width: number, height: number) => {
     format: RGBAFormat,
   })
 
-
   const uniforms = useMemo(() => ({
     tDiffuse: new Uniform(rt1.texture),
     tDepth: new Uniform(rt1.depthTexture),
     cameraNear: new Uniform(1),
-    cameraFar: new Uniform(10)
+    cameraFar: new Uniform(10),
   }), [])
 
   const material = useMemo(() => new ShaderMaterial({
-    vertexShader:/* glsl */`
+    vertexShader: /* glsl */`
     varying vec2 vUv;
     void main() {
       vUv = uv;
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
     `,
-    fragmentShader:/* glsl */`
+    fragmentShader: /* glsl */`
     #include <packing>
 
     varying vec2 vUv;
@@ -68,7 +63,7 @@ const useDepthTexture = (width: number, height: number) => {
       gl_FragColor.a = 1.0;
     }
     `,
-    uniforms
+    uniforms,
   }), [])
 
   const fullScreenQuad = useMemo(() => new FullScreenQuad(material), [])
@@ -88,10 +83,8 @@ const useDepthTexture = (width: number, height: number) => {
   })
 
   return { depthTexture: rt2.texture as Texture }
-
 }
 
-
 export {
-  useDepthTexture
+  useDepthTexture,
 }

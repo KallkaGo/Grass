@@ -10,6 +10,7 @@ uniform vec4 grassParams;
 uniform sampler2D tileDataTexture;
 uniform float time;
 uniform vec3 playerPos;
+uniform vec3 moveDir;
 
 #define PI 3.14159
 
@@ -101,16 +102,40 @@ void main() {
   vec2 hashedInstanceID = hash21(float(gl_InstanceID)) * 2. - 1.;
   vec3 grassOffset = vec3(hashedInstanceID.x, 0, hashedInstanceID.y) * GRASS_PATCH_SIZE;
 
-  grassOffset = terrianHeight(grassOffset);
+  vec3 originalGrassOffset = grassOffset;
+
+  grassOffset = terrianHeight(grassOffset - vec3(playerPos.x, 0., playerPos.z));
+
+  vec2 playerPosXZ = vec2(playerPos.x, playerPos.z);
+  vec2 grassOffsetXZ = vec2(grassOffset.x, grassOffset.z);
+
+  bool flag1 = abs(grassOffsetXZ.x - playerPosXZ.x) <= GRASS_PATCH_SIZE;
+  bool flag2 = abs(grassOffsetXZ.y - playerPosXZ.y) <= GRASS_PATCH_SIZE;
+
+  vec3 test = vec3(0.);
+
+  if(!flag1) {
+    float dirX = sign(playerPosXZ.x - grassOffsetXZ.x);
+    // Debug
+    // test.x = dirX;
+    // test.y = grassOffset.x;
+    // test.z = 1.;
+    grassOffset = terrianHeight(vec3(grassOffset.x + dirX * GRASS_PATCH_SIZE * 2.0, 0.0, grassOffset.z));
+  }
+
+  if(!flag2) {
+    float dirZ = sign(playerPosXZ.y - grassOffsetXZ.y);
+    grassOffset = terrianHeight(vec3(grassOffset.x, 0.0, grassOffset.z + dirZ * GRASS_PATCH_SIZE * 2.0));
+  }
 
   vec4 grassBladeWorldPos = modelMatrix * vec4(grassOffset, 1.0);
-  vec3 hashVal = hash(grassBladeWorldPos.xyz);
+  vec3 hashVal = hash(originalGrassOffset.xyz);
 
   // Grass rotation
   float angle = remap(hashVal.x, -1., 1., -PI, PI);
 
   // -x map 0 x map 1
-  vec2 uv = vec2(grassOffset.x, grassOffset.z) / GRASS_PATCH_SIZE * .5 + .5;
+  vec2 uv = vec2(originalGrassOffset.x, originalGrassOffset.z) / GRASS_PATCH_SIZE * .5 + .5;
 
   vec4 tileData = texture2D(tileDataTexture, uv);
 
