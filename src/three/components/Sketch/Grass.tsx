@@ -2,8 +2,10 @@ import { useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useGameStore } from '@utils/Store'
 
+import { useControls } from 'leva'
 import { useMemo } from 'react'
 import {
+  Color,
   InstancedBufferGeometry,
   Sphere,
   Uniform,
@@ -15,11 +17,11 @@ import RES from '../RES'
 import grassFragmentShader from '../Shader/grass/fragment.glsl'
 import grassVertexShader from '../Shader/grass/vertex.glsl'
 
-const NUM_GRASS = 32 * 1024
+const NUM_GRASS = 32 * 1024 * 2
 const GRASS_SEGMENTS = 6
 const GRASS_VERTICES = (GRASS_SEGMENTS + 1) * 2
-const GRASS_PATCH_SIZE = 25
-const GRASS_WIDTH = 0.15
+const GRASS_PATCH_SIZE = 50
+const GRASS_WIDTH = 0.2
 const GRASS_HEIGHT = 2
 
 function Grass() {
@@ -77,9 +79,26 @@ function Grass() {
       tileDataTexture: new Uniform(tileDataTex),
       grassDiffuseTex: new Uniform(grassDiffuse),
       playerPos: new Uniform(new Vector3()),
+      uBaseColor: new Uniform(new Color()),
+      uTipColor: new Uniform(new Color()),
     }),
     [],
   )
+
+  useControls('grassColor', {
+    baseColor: {
+      value: '#0bd50b',
+      onChange: (val) => {
+        uniforms.uBaseColor.value.set(val)
+      },
+    },
+    tipColor: {
+      value: '#00ff00',
+      onChange: (val) => {
+        uniforms.uTipColor.value.set(val)
+      }
+    },
+  })
 
   useFrame((state, delta) => {
     delta %= 1

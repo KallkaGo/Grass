@@ -97,7 +97,7 @@ function Ball() {
 
   return (
     <>
-      <primitive object={gltf.scene} scale={20} ref={modelRef} />
+      <primitive object={gltf.scene} scale={20} ref={modelRef} frustumCulled={false} />
       <directionalLight position={[10, 10, 10]} />
       <ambientLight intensity={2} />
     </>

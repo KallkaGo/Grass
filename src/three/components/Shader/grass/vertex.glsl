@@ -11,6 +11,8 @@ uniform sampler2D tileDataTexture;
 uniform float time;
 uniform vec3 playerPos;
 uniform vec3 moveDir;
+uniform vec3 uBaseColor;
+uniform vec3 uTipColor;
 
 #define PI 3.14159
 
@@ -86,8 +88,14 @@ vec3 terrianNormal(vec3 worldPos) {
 
 }
 
+float getGrassAttenuation(vec2 position,vec2 playerPosition,float dis)
+{
+    float distanceAttenuation = distance(playerPosition.xy, position) / dis;
+    return 1.0 - clamp(0.0, 1.0, smoothstep(0.3, 1.0, distanceAttenuation));
+}
+
 const vec3 BASE_COLOR = vec3(0.14, 0.56, 0.06);
-const vec3 TIP_COLOR = vec3(0.0, 1.0, 0.0);
+const vec3 TIP_COLOR = vec3(0.15, 0.65, 0.15);
 
 void main() {
 
@@ -144,6 +152,8 @@ void main() {
 
   vec3 playPos = playerPos;
 
+  float distanceAttenuation = getGrassAttenuation(vec2(grassBladeWorldPos.x, grassBladeWorldPos.z), vec2(playPos.x, playPos.z), 55.);
+
   float distanceTograss = distance(playPos, vec3(grassBladeWorldPos.x, 0., grassBladeWorldPos.z));
 
   float tiltFactor = clamp(distanceTograss / 3., 0.0, 1.0);
@@ -173,12 +183,12 @@ void main() {
 
   float heightPercent = float(vertex_ID - xTest) / (float(GRASS_SEGMENTS) * 2.);
 
-  float width = GRASS_WIDTH * mix(1., smoothstep(0., .25, 1. - heightPercent), step(tileData.x, .7)) * tileGrassHeight;
+  float width = GRASS_WIDTH * mix(1., smoothstep(0., .25, 1. - heightPercent), step(tileData.x, .7)) * tileGrassHeight * clamp(distanceAttenuation, .3, 1.);
   // float width = GRASS_WIDTH * easeOut(1. - heightPercent, 4.);
   // float width = GRASS_WIDTH * smoothstep(0., .25, 1. - heightPercent) * tileGrassHeight;
   // float width = GRASS_WIDTH;
 
-  float height = GRASS_HEIGHT * tileGrassHeight * remap(hashVal.y, -1., 1., .7, 1.) * max(1., mix(1., 1.5, grassType) * tileData.x);
+  float height = GRASS_HEIGHT * tileGrassHeight * remap(hashVal.y, -1., 1., .7, 1.) * max(1., mix(1., 1.5, grassType) * tileData.x) * distanceAttenuation;
 
   float x = (xSide - .5) * width;
   float y = heightPercent * height;
@@ -270,7 +280,7 @@ void main() {
   // vColor = mix(BASE_COLOR, TIP_COLOR, heightPercent);
   // vColor = mix(vec3(1., 0., 0.), vColor, stiffness);
 
-  vec3 c1 = mix(BASE_COLOR, TIP_COLOR, heightPercent);
+  vec3 c1 = mix(uBaseColor, uTipColor, heightPercent);
   vec3 c2 = mix(vec3(0.6, 0.6, 0.4), vec3(0.88, 0.87, 0.52), heightPercent);
 
   float noiseValue = noise(grassBladeWorldPos.xyz * .1);
