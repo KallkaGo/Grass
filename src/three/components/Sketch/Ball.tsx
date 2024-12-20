@@ -1,20 +1,9 @@
-import type {
-  Group,
-  Mesh,
-  MeshStandardMaterial,
-  Object3D,
-} from 'three'
+import type { Group, Mesh, MeshStandardMaterial, Object3D } from 'three'
 import { useGLTF } from '@react-three/drei'
 import { useGameStore } from '@utils/Store'
 import { useControls } from 'leva'
 import { useEffect, useMemo, useRef } from 'react'
-import {
-  Box3,
-  MeshToonMaterial,
-  Quaternion,
-  Uniform,
-  Vector3,
-} from 'three'
+import { Box3, MeshToonMaterial, Quaternion, Uniform, Vector3 } from 'three'
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 import RES from '../RES'
 import vertexShader from '../Shader/ball/vertex.glsl'
@@ -32,8 +21,8 @@ function Ball() {
 
   const uniforms = useMemo(
     () => ({
-      uBallPos: new Uniform(new Vector3(0)),
       halfHeight: new Uniform(0),
+      uBallPos: new Uniform(new Vector3()),
     }),
     [],
   )
@@ -71,7 +60,7 @@ function Ball() {
       step: 0.1,
       invert: true,
       onChange: (val) => {
-        const lastPos = new Vector3().copy(uniforms.uBallPos.value)
+        const lastPos = modelRef.current!.position
         const deltaX = val.x - lastPos.x
         const deltaZ = val.z - lastPos.z
         const { direction, upDir } = baseParams.current
@@ -83,6 +72,8 @@ function Ball() {
         const angle = Math.PI / 20
 
         const q = new Quaternion().setFromAxisAngle(axis, angle)
+
+        modelRef.current!.position.set(val.x, 0, val.z)
 
         modelRef.current!.quaternion.premultiply(q)
 
@@ -97,7 +88,7 @@ function Ball() {
 
   return (
     <>
-      <primitive object={gltf.scene} scale={20} ref={modelRef} frustumCulled={false} />
+      <primitive object={gltf.scene} scale={20} ref={modelRef} />
       <directionalLight position={[10, 10, 10]} />
       <ambientLight intensity={2} />
     </>
