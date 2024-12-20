@@ -5,6 +5,7 @@ varying vec3 vWorldPosition;
 varying vec3 vWorldNormal;
 uniform sampler2D diffuseTexture;
 uniform sampler2D groundTex;
+uniform sampler2D roughnessTex;
 uniform vec3 groundColor;
 
 float hash(vec2 p)  // replace this by something better
@@ -45,6 +46,11 @@ void main() {
   vec4 groundTex = texture2D(groundTex, vUv);
   colour = groundTex.rgb;
   colour = groundColor;
+
+  // Roughness
+  vec3 roughnessTex = texture(roughnessTex, vUv).rgb;
+
+  colour *= roughnessTex;
 
   // Lighting
   vec3 lightDir = normalize(vec3(-1., .5, 1.));
