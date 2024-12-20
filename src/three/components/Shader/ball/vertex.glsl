@@ -12,5 +12,6 @@ void main() {
   float offsetY = terrianHeight(uBallPos).y;
   worldPos.y += offsetY;
   worldPos.y += halfHeight;
+  worldPos.y -= 2.5;
   csm_PositionRaw = projectionMatrix * viewMatrix * vec4(worldPos, 1.0);
 }

@@ -73,7 +73,7 @@ function Ball() {
 
         const q = new Quaternion().setFromAxisAngle(axis, angle)
 
-        modelRef.current!.position.set(val.x, 0, val.z)
+        modelRef.current!.position.set(val.x, 2.5, val.z)
 
         modelRef.current!.quaternion.premultiply(q)
 
