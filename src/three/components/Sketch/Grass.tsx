@@ -37,6 +37,7 @@ function Grass() {
 
   // ex 2:
   const grassDiffuse = useTexture(RES.textures.grass)
+  grassDiffuse.generateMipmaps = false
 
   const geometry = useMemo(() => {
     const indices: number[] = []
@@ -96,7 +97,7 @@ function Grass() {
       value: '#00ff00',
       onChange: (val) => {
         uniforms.uTipColor.value.set(val)
-      }
+      },
     },
   })
 
