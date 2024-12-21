@@ -234,6 +234,10 @@ void main() {
 
   float viewSpaceTickenFactor = easeOut(1. - NdotL, 4.) * smoothstep(0., .2, NdotL);
 
+  /* 
+    form '/' to 'X' because influence of -Zside
+   */
+
   mvPosition.x += viewSpaceTickenFactor * (xSide - .5) * width * .5 * -zSide;
 
   gl_Position = projectionMatrix * mvPosition;
