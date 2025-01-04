@@ -6,6 +6,7 @@ import grid from '@textures/grid.png'
 import ground2 from '@textures/ground2.jpg'
 import ground3 from '@textures/ground3.jpg'
 import ground from '@textures/ground.jpg'
+import roughnessTex from '@textures/roughness.png'
 import tileData from '@textures/tileData.png'
 
 export default {
@@ -18,6 +19,7 @@ export default {
     grass2,
     ground2,
     ground3,
+    roughnessTex,
   },
   models: {
     masterBall,

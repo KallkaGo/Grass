@@ -7,10 +7,8 @@ import groundFragmentShader from '../Shader/ground/fragment.glsl'
 import groundVertexShader from '../Shader/ground/vertex.glsl'
 
 function Ground() {
-  const diffuseTex = useTexture(RES.textures.grid)
+  const [diffuseTex, roughnessTex, groundTex] = useTexture([RES.textures.grid, RES.textures.roughnessTex, RES.textures.ground3])
   diffuseTex.wrapS = diffuseTex.wrapT = RepeatWrapping
-
-  const groundTex = useTexture(RES.textures.ground3)
   groundTex.colorSpace = SRGBColorSpace
 
   const uniforms = useMemo(
@@ -18,13 +16,15 @@ function Ground() {
       diffuseTexture: new Uniform(diffuseTex),
       groundTex: new Uniform(groundTex),
       groundColor: new Uniform(new Color()),
+      roughnessTex: new Uniform(roughnessTex),
     }),
     [],
   )
 
   useControls('groundColor', {
     color: {
-      value: '#9ddb7b',
+      // #9ddb7e
+      value: ' #86e852',
       onChange: (val) => {
         uniforms.groundColor.value.set(val)
       },
