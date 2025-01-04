@@ -123,6 +123,7 @@ void main() {
   vec3 test = vec3(0.);
 
   if(!flag1) {
+    // cuz grassOffset base to gl_InstanceID, so it won't change, dirX = sign(playerPosXZ.x - grassOffsetXZ.x) = sign(playerPosXZ.x)
     float dirX = sign(playerPosXZ.x - grassOffsetXZ.x);
     // Debug
     // test.x = dirX;
