@@ -40,6 +40,7 @@ const Grass = () => {
 
   // ex 2:
   const grassDiffuse = useTexture(RES.textures.grass);
+  grassDiffuse.generateMipmaps = false
 
   const geometry = useMemo(() => {
     const indices: number[] = [];
